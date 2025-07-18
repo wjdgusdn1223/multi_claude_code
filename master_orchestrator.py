@@ -100,6 +100,12 @@ class RoleInstance:
     performance_score: float
     error_count: int
     
+    def is_running(self) -> bool:
+        """프로세스가 실행 중인지 확인"""
+        if self.process is None:
+            return False
+        return self.process.poll() is None
+    
 @dataclass
 class UserDecision:
     """사용자 결정 요청"""
