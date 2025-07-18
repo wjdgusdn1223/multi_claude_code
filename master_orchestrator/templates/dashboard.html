@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Orchestrator Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold mb-6">🎯 Master Orchestrator</h1>
+        
+        <!-- 시스템 상태 -->
+        <div class="grid grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-4 rounded shadow">
+                <h3 class="font-semibold">현재 단계</h3>
+                <p id="current-phase" class="text-xl text-blue-600">--</p>
+            </div>
+            <div class="bg-white p-4 rounded shadow">
+                <h3 class="font-semibold">활성 역할</h3>
+                <p id="active-roles" class="text-xl text-green-600">--</p>
+            </div>
+            <div class="bg-white p-4 rounded shadow">
+                <h3 class="font-semibold">대기 결정</h3>
+                <p id="pending-decisions" class="text-xl text-yellow-600">--</p>
+            </div>
+            <div class="bg-white p-4 rounded shadow">
+                <h3 class="font-semibold">진행률</h3>
+                <p id="progress" class="text-xl text-purple-600">--</p>
+            </div>
+        </div>
+        
+        <!-- 역할 상태 -->
+        <div class="bg-white rounded shadow mb-6">
+            <div class="p-4 border-b">
+                <h2 class="text-xl font-semibold">역할 상태</h2>
+            </div>
+            <div id="roles-container" class="p-4">
+                <!-- 역할 카드들이 여기에 동적으로 추가됩니다 -->
+            </div>
+        </div>
+        
+        <!-- 채팅 인터페이스 -->
+        <div class="bg-white rounded shadow mb-6">
+            <div class="p-4 border-b">
+                <h2 class="text-xl font-semibold">💬 AI 역할과 채팅</h2>
+            </div>
+            <div class="p-4">
+                <!-- 채팅 메시지 영역 -->
+                <div id="chat-messages" class="h-96 overflow-y-auto border rounded p-4 mb-4 bg-gray-50">
+                    <p class="text-gray-500 text-center">역할을 선택하고 메시지를 보내세요</p>
+                </div>
+                
+                <!-- 메시지 입력 영역 -->
+                <div class="flex space-x-2">
+                    <select id="target-role" class="px-3 py-2 border rounded">
+                        <option value="">역할 선택</option>
+                        <option value="project_manager">프로젝트 매니저</option>
+                        <option value="business_analyst">비즈니스 분석가</option>
+                        <option value="system_architect">시스템 설계자</option>
+                        <option value="backend_developer">백엔드 개발자</option>
+                        <option value="frontend_developer">프론트엔드 개발자</option>
+                        <option value="devops_engineer">데브옵스 엔지니어</option>
+                        <option value="qa_engineer">QA 엔지니어</option>
+                    </select>
+                    <input type="text" id="message-input" placeholder="메시지를 입력하세요..." 
+                           class="flex-1 px-3 py-2 border rounded">
+                    <button onclick="sendMessage()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        전송
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 명령어 승인 요청 -->
+        <div class="bg-white rounded shadow mb-6">
+            <div class="p-4 border-b">
+                <h2 class="text-xl font-semibold">⚡ 명령어 승인 요청</h2>
+            </div>
+            <div id="approval-requests" class="p-4">
+                <p class="text-gray-500">승인 요청이 없습니다.</p>
+            </div>
+        </div>
+        
+        <!-- 사용자 결정 -->
+        <div class="bg-white rounded shadow mb-6">
+            <div class="p-4 border-b">
+                <h2 class="text-xl font-semibold">사용자 결정 필요</h2>
+            </div>
+            <div id="decisions-container" class="p-4">
+                <!-- 결정 요청들이 여기에 동적으로 추가됩니다 -->
+            </div>
+        </div>
+        
+        <!-- 파일 탐색기 -->
+        <div class="bg-white rounded shadow">
+            <div class="p-4 border-b">
+                <h2 class="text-xl font-semibold">프로젝트 파일</h2>
+            </div>
+            <div id="files-container" class="p-4">
+                <!-- 파일 목록이 여기에 표시됩니다 -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const socket = io();
+        
+        socket.on('connect', function() {
+            console.log('서버 연결됨');
+            loadDashboardData();
+        });
+        
+        socket.on('status_update', function(data) {
+            updateDashboard(data);
+        });
+        
+        socket.on('user_decision_required', function(data) {
+            addDecisionRequest(data);
+        });
+        
+        socket.on('new_message', function(data) {
+            addChatMessage(data);
+        });
+        
+        socket.on('approval_request', function(data) {
+            addApprovalRequest(data);
+        });
+        
+        function loadDashboardData() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => updateDashboard(data));
+                
+            fetch('/api/roles')
+                .then(response => response.json())
+                .then(data => updateRoles(data));
+                
+            fetch('/api/decisions')
+                .then(response => response.json())
+                .then(data => updateDecisions(data));
+                
+            loadChatMessages();
+            loadApprovalRequests();
+        }
+        
+        function updateDashboard(data) {
+            document.getElementById('current-phase').textContent = data.current_phase || '--';
+            document.getElementById('active-roles').textContent = data.active_roles || 0;
+            document.getElementById('pending-decisions').textContent = data.pending_decisions || 0;
+            document.getElementById('progress').textContent = (data.progress || 0) + '%';
+        }
+        
+        function updateRoles(roles) {
+            const container = document.getElementById('roles-container');
+            container.innerHTML = '';
+            
+            roles.forEach(role => {
+                const roleCard = createRoleCard(role);
+                container.appendChild(roleCard);
+            });
+        }
+        
+        function createRoleCard(role) {
+            const card = document.createElement('div');
+            card.className = 'border rounded p-3 mb-2';
+            card.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h4 class="font-semibold">${role.role_name}</h4>
+                        <p class="text-sm text-gray-600">${role.current_task || '대기 중'}</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="px-2 py-1 text-xs rounded ${getStatusColor(role.status)}">${role.status}</span>
+                        <button onclick="controlRole('${role.role_id}', 'start')" class="px-2 py-1 text-xs bg-green-500 text-white rounded">시작</button>
+                        <button onclick="controlRole('${role.role_id}', 'stop')" class="px-2 py-1 text-xs bg-red-500 text-white rounded">중지</button>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+        
+        function getStatusColor(status) {
+            const colors = {
+                'active': 'bg-green-100 text-green-800',
+                'busy': 'bg-yellow-100 text-yellow-800',
+                'stopped': 'bg-gray-100 text-gray-800',
+                'error': 'bg-red-100 text-red-800'
+            };
+            return colors[status] || 'bg-gray-100 text-gray-800';
+        }
+        
+        function controlRole(roleId, action) {
+            fetch(`/api/control/${action}_role`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({role_id: roleId})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    loadDashboardData();
+                }
+            });
+        }
+        
+        function updateDecisions(decisions) {
+            const container = document.getElementById('decisions-container');
+            container.innerHTML = '';
+            
+            if (decisions.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">대기 중인 결정이 없습니다.</p>';
+                return;
+            }
+            
+            decisions.forEach(decision => {
+                const decisionCard = createDecisionCard(decision);
+                container.appendChild(decisionCard);
+            });
+        }
+        
+        function createDecisionCard(decision) {
+            const card = document.createElement('div');
+            card.className = 'border rounded p-4 mb-3 bg-yellow-50';
+            
+            const optionsHtml = decision.options.map(option => 
+                `<button onclick="handleDecision('${decision.decision_id}', '${option.id}')" 
+                         class="px-4 py-2 mr-2 mb-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    ${option.label}
+                </button>`
+            ).join('');
+            
+            card.innerHTML = `
+                <h4 class="font-semibold text-lg mb-2">${decision.title}</h4>
+                <p class="text-gray-700 mb-3">${decision.description}</p>
+                <div class="mb-3">${optionsHtml}</div>
+                <p class="text-sm text-gray-500">요청자: ${decision.requesting_role}</p>
+            `;
+            
+            return card;
+        }
+        
+        function handleDecision(decisionId, optionId) {
+            fetch(`/api/decision/${decisionId}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({option_id: optionId})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    loadDashboardData();
+                }
+            });
+        }
+        
+        // 채팅 관련 함수들
+        function sendMessage() {
+            const targetRole = document.getElementById('target-role').value;
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value.trim();
+            
+            if (!targetRole || !message) {
+                alert('역할을 선택하고 메시지를 입력하세요.');
+                return;
+            }
+            
+            fetch('/api/chat/send', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    target_role: targetRole,
+                    message: message
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    messageInput.value = '';
+                    loadChatMessages();
+                } else {
+                    alert('메시지 전송에 실패했습니다.');
+                }
+            });
+        }
+        
+        function loadChatMessages() {
+            const targetRole = document.getElementById('target-role').value;
+            if (!targetRole) return;
+            
+            fetch(`/api/chat/messages?role=${targetRole}`)
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('chat-messages');
+                    container.innerHTML = '';
+                    
+                    data.forEach(message => {
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = `mb-3 p-3 rounded ${
+                            message.sender === 'user' ? 'bg-blue-100 ml-8' : 'bg-gray-100 mr-8'
+                        }`;
+                        messageDiv.innerHTML = `
+                            <div class="font-semibold text-sm mb-1">
+                                ${message.sender === 'user' ? '사용자' : message.target_role}
+                            </div>
+                            <div>${message.content}</div>
+                            <div class="text-xs text-gray-500 mt-1">${message.timestamp}</div>
+                        `;
+                        container.appendChild(messageDiv);
+                    });
+                    
+                    container.scrollTop = container.scrollHeight;
+                });
+        }
+        
+        function loadApprovalRequests() {
+            fetch('/api/chat/approvals')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('approval-requests');
+                    container.innerHTML = '';
+                    
+                    if (data.length === 0) {
+                        container.innerHTML = '<p class="text-gray-500">승인 요청이 없습니다.</p>';
+                        return;
+                    }
+                    
+                    data.forEach(request => {
+                        const requestDiv = document.createElement('div');
+                        requestDiv.className = 'border rounded p-4 mb-3 bg-yellow-50';
+                        requestDiv.innerHTML = `
+                            <h4 class="font-semibold">${request.role}의 명령어 실행 요청</h4>
+                            <p class="text-sm text-gray-600 mb-2">${request.description}</p>
+                            <div class="bg-gray-800 text-white p-2 rounded mb-3">
+                                <code>${request.command}</code>
+                            </div>
+                            <div class="space-x-2">
+                                <button onclick="approveCommand('${request.request_id}', true)" 
+                                        class="px-4 py-2 bg-green-500 text-white rounded">승인</button>
+                                <button onclick="approveCommand('${request.request_id}', false)" 
+                                        class="px-4 py-2 bg-red-500 text-white rounded">거부</button>
+                            </div>
+                        `;
+                        container.appendChild(requestDiv);
+                    });
+                });
+        }
+        
+        function approveCommand(requestId, approved) {
+            fetch('/api/chat/approve', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    request_id: requestId,
+                    approved: approved
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    loadApprovalRequests();
+                }
+            });
+        }
+        
+        function addChatMessage(message) {
+            const targetRole = document.getElementById('target-role').value;
+            if (targetRole === message.target_role) {
+                loadChatMessages();
+            }
+        }
+        
+        function addApprovalRequest(request) {
+            loadApprovalRequests();
+        }
+        
+        // 역할 선택 시 채팅 메시지 로드
+        document.getElementById('target-role').addEventListener('change', function() {
+            loadChatMessages();
+        });
+        
+        // 엔터 키로 메시지 전송
+        document.getElementById('message-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // 30초마다 데이터 새로고침
+        setInterval(loadDashboardData, 30000);
+    </script>
+</body>
+</html>

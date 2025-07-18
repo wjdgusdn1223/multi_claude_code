@@ -1,0 +1,33 @@
+INFO - 🚀 새 프로젝트 시작
+INFO - 📋 워크플로우 단계 시작: planning
+INFO - 👤 역할 인스턴스 시작: project_manager
+INFO - 스크립트 생성 완료: roles/project_manager/start_project_manager.sh
+INFO - 🌐 웹 인터페이스 시작: http://0.0.0.0:5000
+WARNING - 역할 project_manager 프로세스가 예상치 못하게 종료됨
+INFO - 역할 project_manager 재시작 시도 (1/3)
+INFO - 스크립트 생성 완료: roles/project_manager/start_project_manager.sh
+WARNING - 역할 project_manager 프로세스가 예상치 못하게 종료됨
+INFO - 역할 project_manager 재시작 시도 (2/3)
+INFO - 스크립트 생성 완료: roles/project_manager/start_project_manager.sh
+WARNING - 역할 project_manager 프로세스가 예상치 못하게 종료됨
+ERROR - 역할 project_manager 재시작 시도 초과, 중단됨
+WARNING - 역할 project_manager 프로세스가 예상치 못하게 종료됨
+ERROR - 역할 project_manager 재시작 시도 초과, 중단됨
+WARNING - 역할 project_manager 프로세스가 예상치 못하게 종료됨
+ERROR - 역할 project_manager 재시작 시도 초과, 중단됨
+WARNING - 역할 project_manager 프로세스가 예상치 못하게 종료됨
+ERROR - 역할 project_manager 재시작 시도 초과, 중단됨
+WARNING - 역할 project_manager 프로세스가 예상치 못하게 종료됨
+ERROR - 역할 project_manager 재시작 시도 초과, 중단됨
+WARNING - 역할 project_manager 프로세스가 예상치 못하게 종료됨
+ERROR - 역할 project_manager 재시작 시도 초과, 중단됨
+WARNING - 역할 project_manager 프로세스가 예상치 못하게 종료됨
+ERROR - 역할 project_manager 재시작 시도 초과, 중단됨
+WARNING - 역할 project_manager 프로세스가 예상치 못하게 종료됨
+ERROR - 역할 project_manager 재시작 시도 초과, 중단됨
+WARNING - 역할 project_manager 프로세스가 예상치 못하게 종료됨
+ERROR - 역할 project_manager 재시작 시도 초과, 중단됨
+WARNING - 역할 project_manager 프로세스가 예상치 못하게 종료됨
+ERROR - 역할 project_manager 재시작 시도 초과, 중단됨
+WARNING - 역할 project_manager 프로세스가 예상치 못하게 종료됨
+ERROR - 역할 project_manager 재시작 시도 초과, 중단됨

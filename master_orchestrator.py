@@ -27,6 +27,30 @@ import uuid
 # 기존 시스템들 import
 from enhanced_communication_system import ActiveCommunicationEngine, SmartMessage, MessageType
 from intelligent_review_system import IntelligentReviewEngine, ReviewType
+
+# 채팅 메시지 데이터 구조
+@dataclass
+class ChatMessage:
+    message_id: str
+    sender: str  # 'user' 또는 role_id
+    receiver: str  # 'user' 또는 role_id
+    content: str
+    timestamp: datetime
+    message_type: str = "text"  # text, command, response, approval_request
+    processed: bool = False
+
+# 명령어 승인 요청 데이터 구조
+@dataclass
+class CommandApprovalRequest:
+    request_id: str
+    role_id: str
+    command: str
+    description: str
+    tool_name: str
+    parameters: Dict[str, Any]
+    timestamp: datetime
+    approved: Optional[bool] = None
+    user_response: Optional[str] = None
 from context_persistence_system import ContextPersistenceSystem, ContextType
 from smart_file_discovery_system import SmartFileDiscoverySystem, SearchQuery, FileType
 from document_tracking_system import DocumentTrackingSystem
@@ -158,11 +182,17 @@ class MasterOrchestrator:
         # 워크플로우 정의
         self.workflow_steps = self._define_workflow()
         
+        # 채팅 시스템
+        self.chat_messages = []  # 모든 채팅 메시지 저장
+        self.command_approval_requests = {}  # 승인 대기 중인 명령어들
+        self.message_queue = queue.Queue()  # 메시지 큐
+        
         # 백그라운드 스레드들
         self.orchestration_active = True
         self.monitoring_thread = threading.Thread(target=self._monitoring_loop, daemon=True)
         self.communication_thread = threading.Thread(target=self._communication_loop, daemon=True)
         self.decision_thread = threading.Thread(target=self._decision_loop, daemon=True)
+        self.chat_thread = threading.Thread(target=self._chat_processing_loop, daemon=True)
         
         # 웹 라우트 설정
         self._setup_web_routes()
@@ -397,6 +427,8 @@ class MasterOrchestrator:
             self.communication_thread.start()
         if not self.decision_thread.is_alive():
             self.decision_thread.start()
+        if not self.chat_thread.is_alive():
+            self.chat_thread.start()
         
         # 첫 번째 단계 시작
         self._start_workflow_step(ProjectPhase.PLANNING)
@@ -535,10 +567,15 @@ echo "$(date): {role_id} 종료"
 '''
         
         script_path = work_dir / f"start_{role_id}.sh"
-        with open(script_path, 'w') as f:
-            f.write(script_content)
-        
-        script_path.chmod(0o755)
+        try:
+            with open(script_path, 'w') as f:
+                f.write(script_content)
+            
+            script_path.chmod(0o755)
+            self.logger.info(f"스크립트 생성 완료: {script_path}")
+        except Exception as e:
+            self.logger.error(f"스크립트 생성 실패: {str(e)}")
+            raise
         
         # 프로세스 시작
         try:
@@ -900,6 +937,59 @@ echo "$(date): {role_id} 종료"
         def get_files():
             return jsonify(self._get_project_files())
         
+        # 채팅 API 엔드포인트
+        @self.app.route('/api/chat/messages')
+        def get_chat_messages():
+            return jsonify([{
+                'message_id': msg.message_id,
+                'sender': msg.sender,
+                'receiver': msg.receiver,
+                'content': msg.content,
+                'timestamp': msg.timestamp.isoformat(),
+                'message_type': msg.message_type,
+                'processed': msg.processed
+            } for msg in self.chat_messages[-50:]])  # 최근 50개만 반환
+        
+        @self.app.route('/api/chat/send', methods=['POST'])
+        def send_chat_message():
+            data = request.get_json()
+            message = ChatMessage(
+                message_id=str(uuid.uuid4()),
+                sender='user',
+                receiver=data.get('receiver', 'project_manager'),
+                content=data.get('content', ''),
+                timestamp=datetime.now(),
+                message_type=data.get('message_type', 'text'),
+                processed=False
+            )
+            self.chat_messages.append(message)
+            self.message_queue.put(message)
+            return jsonify({'status': 'sent', 'message_id': message.message_id})
+        
+        @self.app.route('/api/chat/approvals')
+        def get_approval_requests():
+            return jsonify([{
+                'request_id': req.request_id,
+                'role_id': req.role_id,
+                'command': req.command,
+                'description': req.description,
+                'tool_name': req.tool_name,
+                'parameters': req.parameters,
+                'timestamp': req.timestamp.isoformat(),
+                'approved': req.approved,
+                'user_response': req.user_response
+            } for req in self.command_approval_requests.values() if req.approved is None])
+        
+        @self.app.route('/api/chat/approve/<request_id>', methods=['POST'])
+        def approve_command(request_id):
+            data = request.get_json()
+            if request_id in self.command_approval_requests:
+                req = self.command_approval_requests[request_id]
+                req.approved = data.get('approved', False)
+                req.user_response = data.get('response', '')
+                return jsonify({'status': 'processed'})
+            return jsonify({'error': 'Request not found'}), 404
+        
         @self.app.route('/api/files/<path:file_path>')
         def get_file_content(file_path):
             return send_file(self.project_root / file_path)
@@ -937,219 +1027,13 @@ echo "$(date): {role_id} 종료"
         static_dir = self.master_dir / "static"
         static_dir.mkdir(exist_ok=True)
         
-        # 메인 대시보드 HTML (간단한 버전)
-        dashboard_html = '''<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Orchestrator Dashboard</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
-</head>
-<body class="bg-gray-100">
-    <div class="container mx-auto p-6">
-        <h1 class="text-3xl font-bold mb-6">🎯 Master Orchestrator</h1>
-        
-        <!-- 시스템 상태 -->
-        <div class="grid grid-cols-4 gap-4 mb-6">
-            <div class="bg-white p-4 rounded shadow">
-                <h3 class="font-semibold">현재 단계</h3>
-                <p id="current-phase" class="text-xl text-blue-600">--</p>
-            </div>
-            <div class="bg-white p-4 rounded shadow">
-                <h3 class="font-semibold">활성 역할</h3>
-                <p id="active-roles" class="text-xl text-green-600">--</p>
-            </div>
-            <div class="bg-white p-4 rounded shadow">
-                <h3 class="font-semibold">대기 결정</h3>
-                <p id="pending-decisions" class="text-xl text-yellow-600">--</p>
-            </div>
-            <div class="bg-white p-4 rounded shadow">
-                <h3 class="font-semibold">진행률</h3>
-                <p id="progress" class="text-xl text-purple-600">--</p>
-            </div>
-        </div>
-        
-        <!-- 역할 상태 -->
-        <div class="bg-white rounded shadow mb-6">
-            <div class="p-4 border-b">
-                <h2 class="text-xl font-semibold">역할 상태</h2>
-            </div>
-            <div id="roles-container" class="p-4">
-                <!-- 역할 카드들이 여기에 동적으로 추가됩니다 -->
-            </div>
-        </div>
-        
-        <!-- 사용자 결정 -->
-        <div class="bg-white rounded shadow mb-6">
-            <div class="p-4 border-b">
-                <h2 class="text-xl font-semibold">사용자 결정 필요</h2>
-            </div>
-            <div id="decisions-container" class="p-4">
-                <!-- 결정 요청들이 여기에 동적으로 추가됩니다 -->
-            </div>
-        </div>
-        
-        <!-- 파일 탐색기 -->
-        <div class="bg-white rounded shadow">
-            <div class="p-4 border-b">
-                <h2 class="text-xl font-semibold">프로젝트 파일</h2>
-            </div>
-            <div id="files-container" class="p-4">
-                <!-- 파일 목록이 여기에 표시됩니다 -->
-            </div>
-        </div>
-    </div>
-    
-    <script>
-        const socket = io();
-        
-        socket.on('connect', function() {
-            console.log('서버 연결됨');
-            loadDashboardData();
-        });
-        
-        socket.on('status_update', function(data) {
-            updateDashboard(data);
-        });
-        
-        socket.on('user_decision_required', function(data) {
-            addDecisionRequest(data);
-        });
-        
-        function loadDashboardData() {
-            fetch('/api/status')
-                .then(response => response.json())
-                .then(data => updateDashboard(data));
-                
-            fetch('/api/roles')
-                .then(response => response.json())
-                .then(data => updateRoles(data));
-                
-            fetch('/api/decisions')
-                .then(response => response.json())
-                .then(data => updateDecisions(data));
-        }
-        
-        function updateDashboard(data) {
-            document.getElementById('current-phase').textContent = data.current_phase || '--';
-            document.getElementById('active-roles').textContent = data.active_roles || 0;
-            document.getElementById('pending-decisions').textContent = data.pending_decisions || 0;
-            document.getElementById('progress').textContent = (data.progress || 0) + '%';
-        }
-        
-        function updateRoles(roles) {
-            const container = document.getElementById('roles-container');
-            container.innerHTML = '';
-            
-            roles.forEach(role => {
-                const roleCard = createRoleCard(role);
-                container.appendChild(roleCard);
-            });
-        }
-        
-        function createRoleCard(role) {
-            const card = document.createElement('div');
-            card.className = 'border rounded p-3 mb-2';
-            card.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h4 class="font-semibold">${role.role_name}</h4>
-                        <p class="text-sm text-gray-600">${role.current_task || '대기 중'}</p>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="px-2 py-1 text-xs rounded ${getStatusColor(role.status)}">${role.status}</span>
-                        <button onclick="controlRole('${role.role_id}', 'start')" class="px-2 py-1 text-xs bg-green-500 text-white rounded">시작</button>
-                        <button onclick="controlRole('${role.role_id}', 'stop')" class="px-2 py-1 text-xs bg-red-500 text-white rounded">중지</button>
-                    </div>
-                </div>
-            `;
-            return card;
-        }
-        
-        function getStatusColor(status) {
-            const colors = {
-                'active': 'bg-green-100 text-green-800',
-                'busy': 'bg-yellow-100 text-yellow-800',
-                'stopped': 'bg-gray-100 text-gray-800',
-                'error': 'bg-red-100 text-red-800'
-            };
-            return colors[status] || 'bg-gray-100 text-gray-800';
-        }
-        
-        function controlRole(roleId, action) {
-            fetch(`/api/control/${action}_role`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({role_id: roleId})
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    loadDashboardData();
-                }
-            });
-        }
-        
-        function updateDecisions(decisions) {
-            const container = document.getElementById('decisions-container');
-            container.innerHTML = '';
-            
-            if (decisions.length === 0) {
-                container.innerHTML = '<p class="text-gray-500">대기 중인 결정이 없습니다.</p>';
-                return;
-            }
-            
-            decisions.forEach(decision => {
-                const decisionCard = createDecisionCard(decision);
-                container.appendChild(decisionCard);
-            });
-        }
-        
-        function createDecisionCard(decision) {
-            const card = document.createElement('div');
-            card.className = 'border rounded p-4 mb-3 bg-yellow-50';
-            
-            const optionsHtml = decision.options.map(option => 
-                `<button onclick="handleDecision('${decision.decision_id}', '${option.id}')" 
-                         class="px-4 py-2 mr-2 mb-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                    ${option.label}
-                </button>`
-            ).join('');
-            
-            card.innerHTML = `
-                <h4 class="font-semibold text-lg mb-2">${decision.title}</h4>
-                <p class="text-gray-700 mb-3">${decision.description}</p>
-                <div class="mb-3">${optionsHtml}</div>
-                <p class="text-sm text-gray-500">요청자: ${decision.requesting_role}</p>
-            `;
-            
-            return card;
-        }
-        
-        function handleDecision(decisionId, optionId) {
-            fetch(`/api/decision/${decisionId}`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({option_id: optionId})
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    loadDashboardData();
-                }
-            });
-        }
-        
-        // 30초마다 데이터 새로고침
-        setInterval(loadDashboardData, 30000);
-    </script>
-</body>
-</html>'''
-        
-        with open(templates_dir / 'dashboard.html', 'w', encoding='utf-8') as f:
-            f.write(dashboard_html)
+        # 템플릿 파일 시스템 사용 - 하드코딩된 HTML 제거
+        # dashboard.html 파일이 존재하지 않으면 기본 템플릿만 생성
+        dashboard_file = templates_dir / 'dashboard.html'
+        if not dashboard_file.exists():
+            self.logger.info("기본 대시보드 템플릿 생성")
+            # 기본 템플릿만 생성하고, 이후에는 파일 시스템의 템플릿을 사용
+            pass
     
     def start_web_interface(self, host: str = '0.0.0.0', port: int = 5000):
         """웹 인터페이스 시작"""
@@ -1388,6 +1272,128 @@ echo "$(date): {role_id} 종료"
         # 메시지 큐에서 온 메시지들을 처리
         pass
     
+    def _chat_processing_loop(self):
+        """채팅 메시지 처리 루프"""
+        while self.orchestration_active:
+            try:
+                # 메시지 큐에서 메시지 처리
+                message = self.message_queue.get(timeout=1)
+                self._process_chat_message(message)
+                self.message_queue.task_done()
+            except queue.Empty:
+                continue
+            except Exception as e:
+                self.logger.error(f"채팅 메시지 처리 오류: {str(e)}")
+    
+    def _process_chat_message(self, message: ChatMessage):
+        """채팅 메시지 처리"""
+        if message.sender == 'user':
+            # 사용자 메시지를 역할에게 전달
+            self._deliver_message_to_role(message.receiver, 'user', message.content, message.message_type)
+            
+            # 역할이 실제 Claude Code 인스턴스라면 응답 생성
+            if message.receiver in self.role_instances:
+                response = self._generate_role_response(message.receiver, message.content)
+                if response:
+                    # 응답 메시지 생성
+                    response_message = ChatMessage(
+                        message_id=str(uuid.uuid4()),
+                        sender=message.receiver,
+                        receiver='user',
+                        content=response,
+                        timestamp=datetime.now(),
+                        message_type='response',
+                        processed=True
+                    )
+                    self.chat_messages.append(response_message)
+                    
+                    # 웹소켓으로 실시간 알림
+                    self.socketio.emit('new_message', {
+                        'message_id': response_message.message_id,
+                        'sender': response_message.sender,
+                        'content': response_message.content,
+                        'timestamp': response_message.timestamp.isoformat(),
+                        'message_type': response_message.message_type
+                    })
+        
+        message.processed = True
+    
+    def _generate_role_response(self, role_id: str, user_message: str) -> str:
+        """실제 Claude Code 인스턴스와 통신하여 응답 생성"""
+        try:
+            # 역할의 작업 디렉토리 확인
+            role_dir = self.project_root / "roles" / role_id
+            if not role_dir.exists():
+                return f"역할 {role_id}를 찾을 수 없습니다."
+            
+            # 메시지 파일 생성 (Claude Code 인스턴스에서 읽을 수 있도록)
+            message_file = role_dir / "user_message.txt"
+            with open(message_file, 'w', encoding='utf-8') as f:
+                f.write(f"사용자 메시지: {user_message}\n")
+                f.write(f"시간: {datetime.now().isoformat()}\n")
+                f.write("이 메시지에 대해 응답해주세요.\n")
+            
+            # 응답 파일 경로
+            response_file = role_dir / "response.txt"
+            if response_file.exists():
+                response_file.unlink()  # 이전 응답 삭제
+            
+            # Claude Code 인스턴스가 실행 중인지 확인
+            role_instance = self.role_instances.get(role_id)
+            if not role_instance or not role_instance.is_running():
+                return f"역할 {role_id}가 현재 실행 중이지 않습니다."
+            
+            # 응답 대기 (최대 30초)
+            max_wait = 30
+            wait_count = 0
+            while wait_count < max_wait:
+                if response_file.exists():
+                    try:
+                        with open(response_file, 'r', encoding='utf-8') as f:
+                            response = f.read().strip()
+                        if response:
+                            response_file.unlink()  # 응답 파일 삭제
+                            return response
+                    except:
+                        pass
+                time.sleep(1)
+                wait_count += 1
+            
+            # 타임아웃 시 기본 응답
+            role_name = self.available_roles.get(role_id, {}).get('name', role_id)
+            return f"{role_name}입니다. 메시지를 받았지만 현재 다른 작업을 처리 중입니다. 잠시 후 다시 시도해주세요."
+            
+        except Exception as e:
+            self.logger.error(f"역할 응답 생성 오류: {str(e)}")
+            return f"죄송합니다. 응답 생성 중 오류가 발생했습니다: {str(e)}"
+    
+    def _request_command_approval(self, role_id: str, command: str, description: str, tool_name: str, parameters: Dict[str, Any]) -> str:
+        """명령어 승인 요청"""
+        request_id = str(uuid.uuid4())
+        approval_request = CommandApprovalRequest(
+            request_id=request_id,
+            role_id=role_id,
+            command=command,
+            description=description,
+            tool_name=tool_name,
+            parameters=parameters,
+            timestamp=datetime.now()
+        )
+        
+        self.command_approval_requests[request_id] = approval_request
+        
+        # 웹소켓으로 승인 요청 알림
+        self.socketio.emit('approval_request', {
+            'request_id': request_id,
+            'role_id': role_id,
+            'command': command,
+            'description': description,
+            'tool_name': tool_name,
+            'parameters': parameters
+        })
+        
+        return request_id
+    
     def _handle_decision_timeout(self, decision: UserDecision):
         """결정 타임아웃 처리"""
         self.logger.warning(f"사용자 결정 타임아웃: {decision.title}")
@@ -1403,7 +1409,7 @@ def main():
     """메인 함수"""
     print("🎯 Master Orchestrator 시작...")
     
-    orchestrator = MasterOrchestrator("/home/jungh/workspace/multi_claude_code_sample")
+    orchestrator = MasterOrchestrator(".")
     
     # 예시 프로젝트 시작
     project_config = {

@@ -1,0 +1,304 @@
+2025-07-18 18:15:59,519 - INFO - 🚀 새 프로젝트 시작
+2025-07-18 18:15:59,528 - INFO - 📋 워크플로우 단계 시작: planning
+2025-07-18 18:15:59,529 - INFO - 👤 역할 인스턴스 시작: project_manager
+2025-07-18 18:15:59,530 - INFO - 스크립트 생성 완료: /home/jungh/workspace/web_community_test/roles/project_manager/start_project_manager.sh
+2025-07-18 18:16:02,538 - INFO - 프로세스 시작 성공: PID 5883
+2025-07-18 18:16:02,571 - INFO - 🌐 웹 인터페이스 시작: http://0.0.0.0:5000
+2025-07-18 18:17:09,610 - INFO - 🚀 새 프로젝트 시작
+2025-07-18 18:17:09,621 - INFO - 📋 워크플로우 단계 시작: planning
+2025-07-18 18:17:09,621 - INFO - 👤 역할 인스턴스 시작: project_manager
+2025-07-18 18:17:09,621 - INFO - 스크립트 생성 완료: /home/jungh/workspace/web_community_test/roles/project_manager/start_project_manager.sh
+2025-07-18 18:17:12,653 - INFO - 프로세스 시작 성공: PID 6140
+2025-07-18 18:17:12,681 - INFO - 🌐 웹 인터페이스 시작: http://0.0.0.0:5000
+2025-07-18 18:21:46,594 - INFO - 🚀 새 프로젝트 시작
+2025-07-18 18:21:46,604 - INFO - 📋 워크플로우 단계 시작: planning
+2025-07-18 18:21:46,605 - INFO - 👤 역할 인스턴스 시작: project_manager
+2025-07-18 18:21:46,607 - INFO - 스크립트 생성 완료: /home/jungh/workspace/web_community_test/roles/project_manager/start_project_manager.sh
+2025-07-18 18:21:49,628 - INFO - 프로세스 시작 성공: PID 6521
+2025-07-18 18:21:49,656 - INFO - 🌐 웹 인터페이스 시작: http://0.0.0.0:5000
+2025-07-18 18:21:56,423 - ERROR - Exception on /api/roles [GET]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1463, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 872, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jungh/workspace/web_community_test/master_orchestrator.py", line 874, in get_roles
+    return jsonify([asdict(r) for r in self.role_instances.values()])
+                    ^^^^^^^^^
+  File "/usr/lib/python3.12/dataclasses.py", line 1322, in asdict
+    return _asdict_inner(obj, dict_factory)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/dataclasses.py", line 1332, in _asdict_inner
+    f.name: _asdict_inner(getattr(obj, f.name), dict)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/dataclasses.py", line 1379, in _asdict_inner
+    return copy.deepcopy(obj)
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 162, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 259, in _reconstruct
+    state = deepcopy(state, memo)
+            ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 136, in deepcopy
+    y = copier(x, memo)
+        ^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 221, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+                             ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 151, in deepcopy
+    rv = reductor(4)
+         ^^^^^^^^^^^
+TypeError: cannot pickle '_thread.lock' object
+2025-07-18 18:22:26,368 - ERROR - Exception on /api/roles [GET]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1463, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 872, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jungh/workspace/web_community_test/master_orchestrator.py", line 874, in get_roles
+    return jsonify([asdict(r) for r in self.role_instances.values()])
+                    ^^^^^^^^^
+  File "/usr/lib/python3.12/dataclasses.py", line 1322, in asdict
+    return _asdict_inner(obj, dict_factory)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/dataclasses.py", line 1332, in _asdict_inner
+    f.name: _asdict_inner(getattr(obj, f.name), dict)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/dataclasses.py", line 1379, in _asdict_inner
+    return copy.deepcopy(obj)
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 162, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 259, in _reconstruct
+    state = deepcopy(state, memo)
+            ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 136, in deepcopy
+    y = copier(x, memo)
+        ^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 221, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+                             ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 151, in deepcopy
+    rv = reductor(4)
+         ^^^^^^^^^^^
+TypeError: cannot pickle '_thread.lock' object
+2025-07-18 18:22:40,954 - ERROR - Exception on /api/roles [GET]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1463, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 872, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jungh/workspace/web_community_test/master_orchestrator.py", line 874, in get_roles
+    return jsonify([asdict(r) for r in self.role_instances.values()])
+                    ^^^^^^^^^
+  File "/usr/lib/python3.12/dataclasses.py", line 1322, in asdict
+    return _asdict_inner(obj, dict_factory)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/dataclasses.py", line 1332, in _asdict_inner
+    f.name: _asdict_inner(getattr(obj, f.name), dict)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/dataclasses.py", line 1379, in _asdict_inner
+    return copy.deepcopy(obj)
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 162, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 259, in _reconstruct
+    state = deepcopy(state, memo)
+            ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 136, in deepcopy
+    y = copier(x, memo)
+        ^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 221, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+                             ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 151, in deepcopy
+    rv = reductor(4)
+         ^^^^^^^^^^^
+TypeError: cannot pickle '_thread.lock' object
+2025-07-18 18:22:56,308 - ERROR - Exception on /api/roles [GET]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1463, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 872, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jungh/workspace/web_community_test/master_orchestrator.py", line 874, in get_roles
+    return jsonify([asdict(r) for r in self.role_instances.values()])
+                    ^^^^^^^^^
+  File "/usr/lib/python3.12/dataclasses.py", line 1322, in asdict
+    return _asdict_inner(obj, dict_factory)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/dataclasses.py", line 1332, in _asdict_inner
+    f.name: _asdict_inner(getattr(obj, f.name), dict)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/dataclasses.py", line 1379, in _asdict_inner
+    return copy.deepcopy(obj)
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 162, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 259, in _reconstruct
+    state = deepcopy(state, memo)
+            ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 136, in deepcopy
+    y = copier(x, memo)
+        ^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 221, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+                             ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 151, in deepcopy
+    rv = reductor(4)
+         ^^^^^^^^^^^
+TypeError: cannot pickle '_thread.lock' object
+2025-07-18 18:24:08,091 - INFO - 🚀 새 프로젝트 시작
+2025-07-18 18:24:08,102 - INFO - 📋 워크플로우 단계 시작: planning
+2025-07-18 18:24:08,102 - INFO - 👤 역할 인스턴스 시작: project_manager
+2025-07-18 18:24:08,104 - INFO - 스크립트 생성 완료: /home/jungh/workspace/web_community_test/roles/project_manager/start_project_manager.sh
+2025-07-18 18:24:11,215 - INFO - 프로세스 시작 성공: PID 6773
+2025-07-18 18:24:11,243 - INFO - 🌐 웹 인터페이스 시작: http://0.0.0.0:5000
+2025-07-18 18:25:12,591 - INFO - 🚀 새 프로젝트 시작
+2025-07-18 18:25:12,604 - INFO - 📋 워크플로우 단계 시작: planning
+2025-07-18 18:25:12,604 - INFO - 👤 역할 인스턴스 시작: project_manager
+2025-07-18 18:25:12,606 - INFO - 스크립트 생성 완료: /home/jungh/workspace/web_community_test/roles/project_manager/start_project_manager.sh
+2025-07-18 18:25:15,652 - INFO - 프로세스 시작 성공: PID 7022
+2025-07-18 18:25:15,682 - INFO - 🌐 웹 인터페이스 시작: http://0.0.0.0:5000
+2025-07-18 18:25:17,215 - ERROR - Exception on /api/roles [GET]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1463, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 872, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jungh/workspace/web_community_test/master_orchestrator.py", line 877, in get_roles
+    role_dict = asdict(role_instance)
+                ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/dataclasses.py", line 1322, in asdict
+    return _asdict_inner(obj, dict_factory)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/dataclasses.py", line 1332, in _asdict_inner
+    f.name: _asdict_inner(getattr(obj, f.name), dict)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/dataclasses.py", line 1379, in _asdict_inner
+    return copy.deepcopy(obj)
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 162, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 259, in _reconstruct
+    state = deepcopy(state, memo)
+            ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 136, in deepcopy
+    y = copier(x, memo)
+        ^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 221, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+                             ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/copy.py", line 151, in deepcopy
+    rv = reductor(4)
+         ^^^^^^^^^^^
+TypeError: cannot pickle '_thread.lock' object
+2025-07-18 18:26:31,356 - INFO - 🚀 새 프로젝트 시작
+2025-07-18 18:26:31,366 - INFO - 📋 워크플로우 단계 시작: planning
+2025-07-18 18:26:31,367 - INFO - 👤 역할 인스턴스 시작: project_manager
+2025-07-18 18:26:31,369 - INFO - 스크립트 생성 완료: /home/jungh/workspace/web_community_test/roles/project_manager/start_project_manager.sh
+2025-07-18 18:26:34,423 - INFO - 프로세스 시작 성공: PID 7139
+2025-07-18 18:26:34,737 - INFO - 🌐 웹 인터페이스 시작: http://0.0.0.0:5000
+2025-07-18 18:27:33,579 - INFO - 🚀 새 프로젝트 시작
+2025-07-18 18:27:33,593 - INFO - 📋 워크플로우 단계 시작: planning
+2025-07-18 18:27:33,594 - INFO - 👤 역할 인스턴스 시작: project_manager
+2025-07-18 18:27:33,594 - INFO - 스크립트 생성 완료: /home/jungh/workspace/web_community_test/roles/project_manager/start_project_manager.sh
+2025-07-18 18:27:36,678 - INFO - 프로세스 시작 성공: PID 7388
+2025-07-18 18:27:36,707 - INFO - 🌐 웹 인터페이스 시작: http://0.0.0.0:5000
+2025-07-18 18:28:36,501 - INFO - 🚀 새 프로젝트 시작
+2025-07-18 18:28:36,511 - INFO - 📋 워크플로우 단계 시작: planning
+2025-07-18 18:28:36,511 - INFO - 👤 역할 인스턴스 시작: project_manager
+2025-07-18 18:28:36,513 - INFO - 스크립트 생성 완료: /home/jungh/workspace/web_community_test/roles/project_manager/start_project_manager.sh
+2025-07-18 18:28:39,587 - INFO - 프로세스 시작 성공: PID 7603
+2025-07-18 18:31:27,938 - INFO - 🚀 새 프로젝트 시작
+2025-07-18 18:31:27,949 - INFO - 📋 워크플로우 단계 시작: planning
+2025-07-18 18:31:27,949 - INFO - 👤 역할 인스턴스 시작: project_manager
+2025-07-18 18:31:27,951 - INFO - 스크립트 생성 완료: /home/jungh/workspace/web_community_test/roles/project_manager/start_project_manager.sh
+2025-07-18 18:31:30,978 - INFO - 프로세스 시작 성공: PID 7803
+2025-07-18 18:31:31,007 - INFO - 🌐 웹 인터페이스 시작: http://0.0.0.0:5000
+2025-07-18 18:31:41,654 - INFO - 역할 project_manager는 이미 활성화됨
+2025-07-18 18:41:08,440 - INFO - 🚀 새 프로젝트 시작
+2025-07-18 18:41:08,451 - INFO - 📋 워크플로우 단계 시작: planning
+2025-07-18 18:41:08,452 - INFO - 👤 역할 인스턴스 시작: project_manager
+2025-07-18 18:41:08,454 - INFO - 스크립트 생성 완료: /home/jungh/workspace/web_community_test/roles/project_manager/start_project_manager.sh
+2025-07-18 18:41:11,495 - INFO - 프로세스 시작 성공: PID 8161
+2025-07-18 18:41:11,526 - INFO - 🌐 웹 인터페이스 시작: http://0.0.0.0:5000
+2025-07-18 18:42:27,810 - INFO - 역할 project_manager는 이미 활성화됨
+2025-07-18 18:47:21,452 - INFO - 🚀 새 프로젝트 시작
+2025-07-18 18:47:21,463 - INFO - 📋 워크플로우 단계 시작: planning
+2025-07-18 18:47:21,463 - INFO - 👤 역할 인스턴스 시작: project_manager
+2025-07-18 18:47:21,465 - INFO - 스크립트 생성 완료: /home/jungh/workspace/web_community_test/roles/project_manager/start_project_manager.sh
+2025-07-18 18:47:24,502 - INFO - 프로세스 시작 성공: PID 8445
+2025-07-18 18:47:24,530 - INFO - 🌐 웹 인터페이스 시작: http://0.0.0.0:5000
+2025-07-18 18:47:50,683 - INFO - 역할 project_manager는 이미 활성화됨
+2025-07-18 18:49:21,323 - INFO - 🚀 새 프로젝트 시작
+2025-07-18 18:49:21,333 - INFO - 📋 워크플로우 단계 시작: planning
+2025-07-18 18:49:21,334 - INFO - 👤 역할 인스턴스 시작: project_manager
+2025-07-18 18:49:21,336 - INFO - 스크립트 생성 완료: /home/jungh/workspace/web_community_test/roles/project_manager/start_project_manager.sh
+2025-07-18 18:49:24,351 - INFO - 프로세스 시작 성공: PID 8505
+2025-07-18 18:49:24,379 - INFO - 🌐 웹 인터페이스 시작: http://0.0.0.0:5000
+2025-07-18 18:52:32,803 - INFO - 🚀 새 프로젝트 시작
+2025-07-18 18:52:32,813 - INFO - 📋 워크플로우 단계 시작: planning
+2025-07-18 18:52:32,815 - INFO - 👤 역할 인스턴스 시작: project_manager
+2025-07-18 18:52:32,816 - INFO - 스크립트 생성 완료: /home/jungh/workspace/web_community_test/roles/project_manager/start_project_manager.sh
+2025-07-18 18:52:35,849 - INFO - 프로세스 시작 성공: PID 8569
+2025-07-18 18:52:35,876 - INFO - 🌐 웹 인터페이스 시작: http://0.0.0.0:5000
+2025-07-18 18:55:51,882 - INFO - 🚀 새 프로젝트 시작
+2025-07-18 18:55:51,893 - INFO - 📋 워크플로우 단계 시작: planning
+2025-07-18 18:55:51,893 - INFO - 👤 역할 인스턴스 시작: project_manager
+2025-07-18 18:55:51,895 - INFO - 스크립트 생성 완료: /home/jungh/workspace/web_community_test/roles/project_manager/start_project_manager.sh
+2025-07-18 18:55:54,913 - INFO - 프로세스 시작 성공: PID 8677
+2025-07-18 18:55:54,958 - INFO - 🌐 웹 인터페이스 시작: http://0.0.0.0:5000
+2025-07-18 18:57:53,785 - INFO - 🚀 새 프로젝트 시작
+2025-07-18 18:57:53,796 - INFO - 📋 워크플로우 단계 시작: planning
+2025-07-18 18:57:53,796 - INFO - 👤 역할 인스턴스 시작: project_manager
+2025-07-18 18:57:53,798 - INFO - 스크립트 생성 완료: /home/jungh/workspace/web_community_test/roles/project_manager/start_project_manager.sh
+2025-07-18 18:57:56,834 - INFO - 프로세스 시작 성공: PID 8718
+2025-07-18 18:57:56,863 - INFO - 🌐 웹 인터페이스 시작: http://0.0.0.0:5000
+2025-07-18 18:58:11,195 - INFO - 메시지 전달: user → project_manager: 
+2025-07-18 18:58:13,701 - INFO - 메시지 전달: user → project_manager: 

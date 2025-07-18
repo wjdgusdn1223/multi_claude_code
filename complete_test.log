@@ -1,0 +1,6 @@
+INFO - 🚀 새 프로젝트 시작
+INFO - 📋 워크플로우 단계 시작: planning
+INFO - 👤 역할 인스턴스 시작: project_manager
+INFO - 스크립트 생성 완료: /home/jungh/workspace/web_community_test/roles/project_manager/start_project_manager.sh
+INFO - 프로세스 시작 성공: PID 6140
+INFO - 🌐 웹 인터페이스 시작: http://0.0.0.0:5000
