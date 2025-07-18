@@ -128,6 +128,17 @@ class WorkflowStep:
     estimated_duration: str
     success_criteria: List[str]
 
+@dataclass
+class RoleCommunication:
+    """역할 간 소통 기록"""
+    communication_id: str
+    from_role: str
+    to_role: str
+    message: str
+    message_type: str
+    timestamp: datetime
+    processed: bool = False
+
 class MasterOrchestrator:
     """마스터 오케스트레이터 - 모든 시스템의 중앙 제어"""
     
@@ -186,6 +197,9 @@ class MasterOrchestrator:
         self.chat_messages = []  # 모든 채팅 메시지 저장
         self.command_approval_requests = {}  # 승인 대기 중인 명령어들
         self.message_queue = queue.Queue()  # 메시지 큐
+        
+        # 역할 간 소통 기록
+        self.role_communications = []
         
         # 백그라운드 스레드들
         self.orchestration_active = True
@@ -735,6 +749,17 @@ echo "$(date): {role_id} 종료"
         
         self.logger.info(f"💬 역할 소통: {from_role} → {to_role}: {message}")
         
+        # 소통 기록 저장
+        communication = RoleCommunication(
+            communication_id=str(uuid.uuid4()),
+            from_role=from_role,
+            to_role=to_role,
+            message=message,
+            message_type=message_type,
+            timestamp=datetime.now()
+        )
+        self.role_communications.append(communication)
+        
         # 대상 역할이 활성화되어 있는지 확인
         if to_role not in self.role_instances:
             # 필요하면 역할 시작
@@ -750,7 +775,7 @@ echo "$(date): {role_id} 종료"
             'from_role': from_role,
             'to_role': to_role,
             'message': message,
-            'timestamp': datetime.now().isoformat()
+            'timestamp': communication.timestamp.isoformat()
         })
     
     def request_rollback(self, requesting_role: str, target_phase: ProjectPhase, reason: str) -> bool:
@@ -989,6 +1014,19 @@ echo "$(date): {role_id} 종료"
                 req.user_response = data.get('response', '')
                 return jsonify({'status': 'processed'})
             return jsonify({'error': 'Request not found'}), 404
+        
+        @self.app.route('/api/role-communications')
+        def get_role_communications():
+            """역할 간 소통 이력 조회"""
+            return jsonify([{
+                'communication_id': comm.communication_id,
+                'from_role': comm.from_role,
+                'to_role': comm.to_role,
+                'message': comm.message,
+                'message_type': comm.message_type,
+                'timestamp': comm.timestamp.isoformat(),
+                'processed': comm.processed
+            } for comm in self.role_communications[-100:]])  # 최근 100개만 반환
         
         @self.app.route('/api/files/<path:file_path>')
         def get_file_content(file_path):

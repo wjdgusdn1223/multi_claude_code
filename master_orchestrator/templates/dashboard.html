@@ -83,6 +83,18 @@
             </div>
         </div>
         
+        <!-- 역할 간 소통 이력 -->
+        <div class="bg-white rounded shadow mb-6">
+            <div class="p-4 border-b">
+                <h2 class="text-xl font-semibold">🔄 역할 간 소통 이력</h2>
+            </div>
+            <div id="role-communications" class="p-4">
+                <div class="h-64 overflow-y-auto">
+                    <p class="text-gray-500">역할 간 소통 이력이 없습니다.</p>
+                </div>
+            </div>
+        </div>
+        
         <!-- 사용자 결정 -->
         <div class="bg-white rounded shadow mb-6">
             <div class="p-4 border-b">
@@ -128,6 +140,10 @@
             addApprovalRequest(data);
         });
         
+        socket.on('role_communication', function(data) {
+            addRoleCommunication(data);
+        });
+        
         function loadDashboardData() {
             fetch('/api/status')
                 .then(response => response.json())
@@ -143,6 +159,7 @@
                 
             loadChatMessages();
             loadApprovalRequests();
+            loadRoleCommunications();
         }
         
         function updateDashboard(data) {
@@ -373,6 +390,70 @@
         
         function addApprovalRequest(request) {
             loadApprovalRequests();
+        }
+        
+        function loadRoleCommunications() {
+            fetch('/api/role-communications')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('role-communications');
+                    const scrollContainer = container.querySelector('.h-64');
+                    scrollContainer.innerHTML = '';
+                    
+                    if (data.length === 0) {
+                        scrollContainer.innerHTML = '<p class="text-gray-500">역할 간 소통 이력이 없습니다.</p>';
+                        return;
+                    }
+                    
+                    data.forEach(comm => {
+                        const commDiv = document.createElement('div');
+                        commDiv.className = 'border-l-4 border-blue-400 pl-4 py-2 mb-3 bg-blue-50';
+                        commDiv.innerHTML = `
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <div class="font-semibold text-sm text-blue-800">
+                                        ${comm.from_role} → ${comm.to_role}
+                                    </div>
+                                    <div class="text-gray-700 mt-1">${comm.message}</div>
+                                </div>
+                                <div class="text-xs text-gray-500 ml-4">
+                                    ${new Date(comm.timestamp).toLocaleString()}
+                                </div>
+                            </div>
+                        `;
+                        scrollContainer.appendChild(commDiv);
+                    });
+                    
+                    scrollContainer.scrollTop = scrollContainer.scrollHeight;
+                });
+        }
+        
+        function addRoleCommunication(communication) {
+            const container = document.getElementById('role-communications');
+            const scrollContainer = container.querySelector('.h-64');
+            
+            // 기존 "소통 이력이 없습니다" 메시지 제거
+            if (scrollContainer.querySelector('.text-gray-500')) {
+                scrollContainer.innerHTML = '';
+            }
+            
+            const commDiv = document.createElement('div');
+            commDiv.className = 'border-l-4 border-blue-400 pl-4 py-2 mb-3 bg-blue-50';
+            commDiv.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="font-semibold text-sm text-blue-800">
+                            ${communication.from_role} → ${communication.to_role}
+                        </div>
+                        <div class="text-gray-700 mt-1">${communication.message}</div>
+                    </div>
+                    <div class="text-xs text-gray-500 ml-4">
+                        ${new Date(communication.timestamp).toLocaleString()}
+                    </div>
+                </div>
+            `;
+            scrollContainer.appendChild(commDiv);
+            scrollContainer.scrollTop = scrollContainer.scrollHeight;
         }
         
         // 역할 선택 시 채팅 메시지 로드
