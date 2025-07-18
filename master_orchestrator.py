@@ -500,10 +500,27 @@ echo "프롬프트: {prompt}"
 # claude-code --role="{role_id}" --prompt="{prompt}" --project="{self.project_root}"
 
 # 시뮬레이션을 위한 더미 프로세스
+echo "$(date): {role_id} 시작됨"
+
+# 상태 파일 생성
+echo "ACTIVE" > "{work_dir}/status.txt"
+
+# 주기적으로 상태 업데이트
 while true; do
     echo "$(date): {role_id} 작업 중..."
+    echo "$(date): ACTIVE" > "{work_dir}/status.txt"
+    
+    # 종료 신호 확인
+    if [ -f "{work_dir}/stop.signal" ]; then
+        echo "$(date): {role_id} 종료 신호 감지"
+        echo "STOPPED" > "{work_dir}/status.txt"
+        break
+    fi
+    
     sleep 30
 done
+
+echo "$(date): {role_id} 종료"
 '''
         
         script_path = work_dir / f"start_{role_id}.sh"
@@ -513,15 +530,25 @@ done
         script_path.chmod(0o755)
         
         # 프로세스 시작
-        process = subprocess.Popen(
-            [str(script_path)],
-            cwd=str(work_dir),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True
-        )
-        
-        return process
+        try:
+            process = subprocess.Popen(
+                ['/bin/bash', str(script_path)],
+                cwd=str(work_dir),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                preexec_fn=os.setsid  # 프로세스 그룹 생성
+            )
+            
+            # 프로세스 상태 확인
+            if process.poll() is not None:
+                stdout, stderr = process.communicate(timeout=5)
+                raise Exception(f"스크립트 실행 실패: {stderr}")
+            
+            return process
+        except Exception as e:
+            self.logger.error(f"프로세스 시작 실패: {str(e)}")
+            raise
     
     def _generate_role_prompt(self, role_id: str, step: WorkflowStep) -> str:
         """역할별 프롬프트 생성"""
@@ -1202,7 +1229,61 @@ done
                 if instance.status != RoleInstanceStatus.STOPPED:
                     self.logger.warning(f"역할 {role_id} 프로세스가 예상치 못하게 종료됨")
                     instance.status = RoleInstanceStatus.ERROR
+                    instance.error_count += 1
                     self._save_role_instance(instance)
+                    
+                    # 에러 카운트가 3번 미만이면 재시작 시도
+                    if instance.error_count < 3:
+                        self.logger.info(f"역할 {role_id} 재시작 시도 ({instance.error_count}/3)")
+                        self._restart_role_instance(role_id)
+                    else:
+                        self.logger.error(f"역할 {role_id} 재시작 시도 초과, 중단됨")
+            
+            # 상태 파일 확인
+            elif instance.status == RoleInstanceStatus.ACTIVE:
+                status_file = Path(instance.work_directory) / "status.txt"
+                if status_file.exists():
+                    try:
+                        with open(status_file, 'r') as f:
+                            status_content = f.read().strip()
+                        if "ACTIVE" in status_content:
+                            instance.last_activity = datetime.now()
+                            self._save_role_instance(instance)
+                    except Exception as e:
+                        self.logger.error(f"상태 파일 읽기 실패: {str(e)}")
+    
+    def _restart_role_instance(self, role_id: str):
+        """역할 인스턴스 재시작"""
+        if role_id not in self.role_instances:
+            return
+        
+        instance = self.role_instances[role_id]
+        
+        # 이전 프로세스 정리
+        if instance.process and instance.process.poll() is None:
+            instance.process.terminate()
+            instance.process.wait(timeout=5)
+        
+        # 새로운 프로세스 시작
+        try:
+            current_step = next((s for s in self.workflow_steps if s.phase == self.current_phase), None)
+            if current_step:
+                role_prompt = self._generate_role_prompt(role_id, current_step)
+                work_dir = Path(instance.work_directory)
+                new_process = self._start_claude_instance(role_id, work_dir, role_prompt)
+                
+                instance.process = new_process
+                instance.status = RoleInstanceStatus.STARTING
+                instance.last_activity = datetime.now()
+                self._save_role_instance(instance)
+                
+                # 3초 후 상태를 ACTIVE로 변경
+                threading.Timer(3.0, lambda: self._set_role_status(role_id, RoleInstanceStatus.ACTIVE)).start()
+                
+        except Exception as e:
+            self.logger.error(f"역할 {role_id} 재시작 실패: {str(e)}")
+            instance.status = RoleInstanceStatus.ERROR
+            self._save_role_instance(instance)
     
     def _check_workflow_progress(self):
         """워크플로우 진행 상황 확인"""
