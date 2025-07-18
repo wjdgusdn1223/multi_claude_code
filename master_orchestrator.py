@@ -866,7 +866,26 @@ echo "$(date): {role_id} 종료"
         
         @self.app.route('/api/roles')
         def get_roles():
-            return jsonify([asdict(r) for r in self.role_instances.values()])
+            roles_data = []
+            for role_instance in self.role_instances.values():
+                # 직렬화 가능한 필드만 수동으로 추출
+                role_dict = {
+                    'role_id': role_instance.role_id,
+                    'role_name': role_instance.role_name,
+                    'status': role_instance.status.value,
+                    'current_task': role_instance.current_task,
+                    'work_directory': role_instance.work_directory,
+                    'log_file': role_instance.log_file,
+                    'start_time': role_instance.start_time.isoformat() if role_instance.start_time else None,
+                    'last_activity': role_instance.last_activity.isoformat() if role_instance.last_activity else None,
+                    'performance_score': role_instance.performance_score,
+                    'error_count': role_instance.error_count,
+                    # 프로세스 상태 정보 추가
+                    'process_pid': role_instance.process.pid if role_instance.process else None,
+                    'process_running': role_instance.process.poll() is None if role_instance.process else False
+                }
+                roles_data.append(role_dict)
+            return jsonify(roles_data)
         
         @self.app.route('/api/decisions')
         def get_decisions():
