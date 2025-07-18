@@ -108,7 +108,7 @@ class MasterOrchestrator:
     """마스터 오케스트레이터 - 모든 시스템의 중앙 제어"""
     
     def __init__(self, project_root: str):
-        self.project_root = Path(project_root)
+        self.project_root = Path(project_root).resolve()  # 절대 경로로 변환
         self.master_dir = self.project_root / "master_orchestrator"
         self.logs_dir = self.master_dir / "logs"
         self.decisions_dir = self.master_dir / "decisions"
@@ -494,16 +494,24 @@ export MASTER_PORT="5000"
 # Claude Code 실행 (예시 - 실제 환경에 맞게 수정 필요)
 echo "Claude Code 역할 {role_id} 시작"
 echo "작업 디렉토리: {work_dir}"
-echo "프롬프트: {prompt}"
+echo "프롬프트 길이: $(echo '{prompt}' | wc -c) 문자"
+
+# 프롬프트를 파일로 저장
+cat > prompt.txt << 'EOF'
+{prompt}
+EOF
 
 # 실제로는 여기서 Claude Code API 호출하거나 CLI 실행
-# claude-code --role="{role_id}" --prompt="{prompt}" --project="{self.project_root}"
+# claude-code --role="{role_id}" --prompt-file="prompt.txt" --project="{self.project_root}"
 
 # 시뮬레이션을 위한 더미 프로세스
 echo "$(date): {role_id} 시작됨"
 
 # 상태 파일 생성
 echo "ACTIVE" > "{work_dir}/status.txt"
+
+# 시그널 핸들러 설정
+trap 'echo "$(date): {role_id} 종료 신호 수신"; echo "STOPPED" > "{work_dir}/status.txt"; exit 0' SIGTERM SIGINT
 
 # 주기적으로 상태 업데이트
 while true; do
@@ -514,10 +522,13 @@ while true; do
     if [ -f "{work_dir}/stop.signal" ]; then
         echo "$(date): {role_id} 종료 신호 감지"
         echo "STOPPED" > "{work_dir}/status.txt"
+        rm -f "{work_dir}/stop.signal"
         break
     fi
     
-    sleep 30
+    # 백그라운드에서 sleep 실행하여 시그널 처리 가능하도록 함
+    sleep 30 &
+    wait $!
 done
 
 echo "$(date): {role_id} 종료"
@@ -540,11 +551,14 @@ echo "$(date): {role_id} 종료"
                 preexec_fn=os.setsid  # 프로세스 그룹 생성
             )
             
-            # 프로세스 상태 확인
+            # 프로세스가 즉시 종료되지 않았는지 확인 (3초 대기)
+            time.sleep(3)
             if process.poll() is not None:
-                stdout, stderr = process.communicate(timeout=5)
+                stdout, stderr = process.communicate()
+                self.logger.error(f"스크립트 조기 종료 - stdout: {stdout[:200]}, stderr: {stderr[:200]}")
                 raise Exception(f"스크립트 실행 실패: {stderr}")
             
+            self.logger.info(f"프로세스 시작 성공: PID {process.pid}")
             return process
         except Exception as e:
             self.logger.error(f"프로세스 시작 실패: {str(e)}")
