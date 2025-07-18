@@ -425,7 +425,11 @@ class MasterOrchestrator:
         self._emit_status_update()
         
         # 워크플로우 로그
-        self._log_workflow_event("step_start", None, f"단계 시작: {phase.value}", asdict(step))
+        step_dict = asdict(step)
+        # ProjectPhase enum을 문자열로 변환
+        if 'phase' in step_dict and hasattr(step_dict['phase'], 'value'):
+            step_dict['phase'] = step_dict['phase'].value
+        self._log_workflow_event("step_start", None, f"단계 시작: {phase.value}", step_dict)
     
     def _start_role_instance(self, role_id: str, step: WorkflowStep):
         """역할 인스턴스 시작"""
