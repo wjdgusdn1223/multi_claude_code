@@ -1,0 +1,84 @@
+# Status Template for Each Role
+# This template should be copied to each role's directory as status.yaml
+
+role_info:
+  role_name: ""  # e.g., "Project Manager"
+  role_id: ""    # e.g., "project_manager"
+  assigned_to: ""  # Claude Code instance identifier
+  start_date: ""   # ISO format: 2024-01-01T00:00:00Z
+  last_updated: "" # ISO format: 2024-01-01T00:00:00Z
+
+current_status:
+  phase: ""  # planning, in_progress, review, completed, blocked, paused
+  progress_percentage: 0  # 0-100
+  current_task: ""  # What they're currently working on
+  next_task: ""     # What's planned next
+  
+dependencies:
+  waiting_for: []  # List of role_ids this role is waiting for
+  blocking: []     # List of role_ids this role is blocking
+  ready_to_start: true  # Boolean: can this role start working?
+
+tasks:
+  pending: []      # List of tasks not yet started
+  in_progress: []  # List of tasks currently being worked on
+  completed: []    # List of completed tasks
+  blocked: []      # List of blocked tasks with reasons
+
+deliverables:
+  required: []     # List of deliverables this role must produce
+  in_progress: []  # Deliverables currently being worked on
+  completed: []    # Completed deliverables with file paths
+  approved: []     # Approved deliverables
+
+inputs:
+  required: []     # List of inputs needed from other roles
+  received: []     # Inputs that have been received
+  missing: []      # Missing inputs that are blocking progress
+
+outputs:
+  produced: []     # Outputs this role has produced
+  delivered_to: [] # Which roles have received outputs
+  pending_delivery: [] # Outputs ready but not yet delivered
+
+communication:
+  last_sync: ""           # Last time synced with other roles
+  pending_questions: []   # Questions waiting for answers
+  decisions_needed: []    # Decisions this role needs to make
+  escalations: []         # Issues that need escalation
+
+quality_gates:
+  reviews_required: []    # Reviews needed before proceeding
+  reviews_completed: []   # Reviews that have been completed
+  approvals_required: []  # Approvals needed
+  approvals_received: []  # Approvals received
+
+metrics:
+  tasks_completed: 0      # Number of tasks completed
+  deliverables_produced: 0 # Number of deliverables produced
+  hours_worked: 0         # Estimated hours worked
+  efficiency_rating: 0    # Self-assessed efficiency (1-10)
+
+issues:
+  current_blockers: []    # Current issues blocking progress
+  resolved_issues: []     # Issues that have been resolved
+  risk_factors: []        # Potential risks identified
+
+notes:
+  daily_log: []           # Daily work log entries
+  decisions_made: []      # Key decisions made
+  lessons_learned: []     # Lessons learned during the work
+  improvement_suggestions: [] # Suggestions for process improvement
+
+context:
+  project_name: ""        # Name of the current project
+  project_phase: ""       # Current phase of the project
+  team_size: 0           # Number of team members
+  timeline: ""           # Project timeline/deadline
+  priority: ""           # Priority level (low, medium, high, critical)
+
+collaboration:
+  frequent_collaborators: []  # Roles frequently worked with
+  communication_channels: []  # How this role communicates
+  meeting_schedule: []       # Regular meetings this role attends
+  shared_resources: []       # Resources shared with other roles

@@ -1,0 +1,500 @@
+roles:
+  # Planning Phase
+  project_manager:
+    role_name: "Project Manager"
+    responsibilities:
+      - "Overall project management and coordination"
+      - "Timeline and milestone management"
+      - "Resource allocation and team coordination"
+      - "Risk management and mitigation"
+      - "Stakeholder communication"
+    deliverables:
+      - "project_plan.md"
+      - "timeline_schedule.md"
+      - "resource_allocation.md"
+      - "risk_assessment.md"
+    dependencies: []
+    reports_to: ["stakeholder"]
+    collaborates_with: ["product_owner", "business_analyst", "system_architect"]
+
+  product_owner:
+    role_name: "Product Owner"
+    responsibilities:
+      - "Define product vision and strategy"
+      - "Manage product backlog"
+      - "Prioritize features and requirements"
+      - "Accept/reject deliverables"
+      - "Bridge business and technical teams"
+    deliverables:
+      - "product_vision.md"
+      - "product_backlog.md"
+      - "feature_prioritization.md"
+      - "acceptance_criteria.md"
+    dependencies: []
+    reports_to: ["stakeholder"]
+    collaborates_with: ["project_manager", "business_analyst", "ux_researcher"]
+
+  business_analyst:
+    role_name: "Business Analyst"
+    responsibilities:
+      - "Analyze business requirements"
+      - "Create detailed functional specifications"
+      - "Document business processes"
+      - "Validate requirements with stakeholders"
+      - "Bridge business and technical requirements"
+    deliverables:
+      - "business_requirements.md"
+      - "functional_specifications.md"
+      - "process_documentation.md"
+      - "use_cases.md"
+    dependencies: ["product_owner"]
+    reports_to: ["product_owner"]
+    collaborates_with: ["requirements_analyst", "ux_researcher"]
+
+  requirements_analyst:
+    role_name: "Requirements Analyst"
+    responsibilities:
+      - "Gather and document technical requirements"
+      - "Create detailed system specifications"
+      - "Validate requirements feasibility"
+      - "Maintain requirements traceability"
+      - "Requirements change management"
+    deliverables:
+      - "technical_requirements.md"
+      - "system_specifications.md"
+      - "requirements_traceability.md"
+      - "change_requests.md"
+    dependencies: ["business_analyst"]
+    reports_to: ["business_analyst"]
+    collaborates_with: ["system_architect", "technical_reviewer"]
+
+  ux_researcher:
+    role_name: "UX Researcher"
+    responsibilities:
+      - "Conduct user research and interviews"
+      - "Create user personas and journey maps"
+      - "Analyze user behavior and needs"
+      - "Validate design concepts with users"
+      - "Provide user insights to design team"
+    deliverables:
+      - "user_research.md"
+      - "user_personas.md"
+      - "user_journey_maps.md"
+      - "usability_testing_results.md"
+    dependencies: ["product_owner"]
+    reports_to: ["product_owner"]
+    collaborates_with: ["ui_ux_designer", "business_analyst"]
+
+  # Design Phase
+  system_architect:
+    role_name: "System Architect"
+    responsibilities:
+      - "Design overall system architecture"
+      - "Define technical standards and guidelines"
+      - "Make technology stack decisions"
+      - "Ensure system scalability and performance"
+      - "Create architecture documentation"
+    deliverables:
+      - "system_architecture.md"
+      - "technical_standards.md"
+      - "technology_stack.md"
+      - "architecture_diagrams.md"
+    dependencies: ["requirements_analyst"]
+    reports_to: ["project_manager"]
+    collaborates_with: ["solution_architect", "database_designer", "devops_engineer"]
+
+  solution_architect:
+    role_name: "Solution Architect"
+    responsibilities:
+      - "Design technical solutions for specific requirements"
+      - "Create detailed technical designs"
+      - "Ensure integration between components"
+      - "Provide technical guidance to developers"
+      - "Review and approve technical implementations"
+    deliverables:
+      - "solution_design.md"
+      - "integration_specifications.md"
+      - "technical_guidelines.md"
+      - "api_specifications.md"
+    dependencies: ["system_architect"]
+    reports_to: ["system_architect"]
+    collaborates_with: ["frontend_developer", "backend_developer", "database_designer"]
+
+  ui_ux_designer:
+    role_name: "UI/UX Designer"
+    responsibilities:
+      - "Create user interface designs"
+      - "Design user experience flows"
+      - "Create wireframes and prototypes"
+      - "Maintain design system consistency"
+      - "Collaborate with developers on implementation"
+    deliverables:
+      - "ui_designs.md"
+      - "wireframes.md"
+      - "prototypes.md"
+      - "design_system.md"
+    dependencies: ["ux_researcher"]
+    reports_to: ["product_owner"]
+    collaborates_with: ["frontend_developer", "ux_researcher"]
+
+  database_designer:
+    role_name: "Database Designer"
+    responsibilities:
+      - "Design database schema and structure"
+      - "Optimize database performance"
+      - "Define data models and relationships"
+      - "Create database migration scripts"
+      - "Ensure data integrity and security"
+    deliverables:
+      - "database_schema.sql"
+      - "data_models.md"
+      - "migration_scripts.sql"
+      - "database_optimization.md"
+    dependencies: ["system_architect"]
+    reports_to: ["system_architect"]
+    collaborates_with: ["backend_developer", "solution_architect"]
+
+  # Development Phase
+  frontend_developer:
+    role_name: "Frontend Developer"
+    responsibilities:
+      - "Implement client-side applications"
+      - "Create responsive user interfaces"
+      - "Integrate with backend APIs"
+      - "Optimize frontend performance"
+      - "Write frontend unit tests"
+    deliverables:
+      - "frontend_code"
+      - "ui_components"
+      - "frontend_tests"
+      - "performance_optimizations.md"
+    dependencies: ["ui_ux_designer", "solution_architect"]
+    reports_to: ["project_manager"]
+    collaborates_with: ["backend_developer", "qa_tester"]
+
+  backend_developer:
+    role_name: "Backend Developer"
+    responsibilities:
+      - "Implement server-side logic"
+      - "Create and maintain APIs"
+      - "Integrate with databases and external services"
+      - "Implement business logic"
+      - "Write backend unit tests"
+    deliverables:
+      - "backend_code"
+      - "api_endpoints"
+      - "backend_tests"
+      - "integration_code"
+    dependencies: ["solution_architect", "database_designer"]
+    reports_to: ["project_manager"]
+    collaborates_with: ["frontend_developer", "database_designer", "qa_tester"]
+
+  fullstack_developer:
+    role_name: "Fullstack Developer"
+    responsibilities:
+      - "Implement both frontend and backend features"
+      - "Ensure end-to-end functionality"
+      - "Handle full feature development lifecycle"
+      - "Maintain code consistency across stack"
+      - "Write comprehensive tests"
+    deliverables:
+      - "fullstack_features"
+      - "end_to_end_tests"
+      - "feature_documentation.md"
+      - "code_integration"
+    dependencies: ["solution_architect", "ui_ux_designer"]
+    reports_to: ["project_manager"]
+    collaborates_with: ["qa_tester", "technical_reviewer"]
+
+  mobile_developer:
+    role_name: "Mobile Developer"
+    responsibilities:
+      - "Develop mobile applications"
+      - "Implement platform-specific features"
+      - "Optimize mobile performance"
+      - "Handle mobile-specific user experience"
+      - "Test on various mobile devices"
+    deliverables:
+      - "mobile_app"
+      - "platform_specific_code"
+      - "mobile_tests"
+      - "performance_optimizations.md"
+    dependencies: ["ui_ux_designer", "solution_architect"]
+    reports_to: ["project_manager"]
+    collaborates_with: ["backend_developer", "qa_tester"]
+
+  devops_engineer:
+    role_name: "DevOps Engineer"
+    responsibilities:
+      - "Set up CI/CD pipelines"
+      - "Manage infrastructure as code"
+      - "Automate deployment processes"
+      - "Monitor system performance"
+      - "Ensure security and compliance"
+    deliverables:
+      - "ci_cd_pipelines"
+      - "infrastructure_code"
+      - "deployment_scripts"
+      - "monitoring_setup"
+    dependencies: ["system_architect"]
+    reports_to: ["project_manager"]
+    collaborates_with: ["infrastructure_engineer", "sre_engineer"]
+
+  # Quality Assurance Phase
+  qa_tester:
+    role_name: "QA Tester"
+    responsibilities:
+      - "Create test plans and test cases"
+      - "Execute manual and automated tests"
+      - "Report and track bugs"
+      - "Validate requirements compliance"
+      - "Ensure quality standards"
+    deliverables:
+      - "test_plans.md"
+      - "test_cases.md"
+      - "bug_reports.md"
+      - "test_results.md"
+    dependencies: ["frontend_developer", "backend_developer"]
+    reports_to: ["project_manager"]
+    collaborates_with: ["automation_tester", "performance_tester"]
+
+  automation_tester:
+    role_name: "Automation Tester"
+    responsibilities:
+      - "Develop automated test scripts"
+      - "Maintain test automation framework"
+      - "Execute automated test suites"
+      - "Integrate tests with CI/CD pipeline"
+      - "Report automation metrics"
+    deliverables:
+      - "automated_tests"
+      - "test_framework"
+      - "automation_reports.md"
+      - "ci_integration"
+    dependencies: ["qa_tester"]
+    reports_to: ["qa_tester"]
+    collaborates_with: ["devops_engineer", "performance_tester"]
+
+  performance_tester:
+    role_name: "Performance Tester"
+    responsibilities:
+      - "Design performance test scenarios"
+      - "Execute load and stress tests"
+      - "Analyze performance metrics"
+      - "Identify performance bottlenecks"
+      - "Provide optimization recommendations"
+    deliverables:
+      - "performance_tests"
+      - "load_test_results.md"
+      - "performance_analysis.md"
+      - "optimization_recommendations.md"
+    dependencies: ["qa_tester"]
+    reports_to: ["qa_tester"]
+    collaborates_with: ["backend_developer", "infrastructure_engineer"]
+
+  security_tester:
+    role_name: "Security Tester"
+    responsibilities:
+      - "Conduct security vulnerability assessments"
+      - "Perform penetration testing"
+      - "Review code for security issues"
+      - "Ensure compliance with security standards"
+      - "Provide security recommendations"
+    deliverables:
+      - "security_assessment.md"
+      - "penetration_test_results.md"
+      - "vulnerability_reports.md"
+      - "security_recommendations.md"
+    dependencies: ["qa_tester"]
+    reports_to: ["qa_tester"]
+    collaborates_with: ["backend_developer", "devops_engineer"]
+
+  # Deployment and Operations Phase
+  infrastructure_engineer:
+    role_name: "Infrastructure Engineer"
+    responsibilities:
+      - "Set up and maintain server infrastructure"
+      - "Configure network and security settings"
+      - "Manage server resources and capacity"
+      - "Implement disaster recovery plans"
+      - "Monitor infrastructure health"
+    deliverables:
+      - "infrastructure_setup"
+      - "server_configurations"
+      - "disaster_recovery_plan.md"
+      - "infrastructure_monitoring"
+    dependencies: ["devops_engineer"]
+    reports_to: ["devops_engineer"]
+    collaborates_with: ["cloud_engineer", "sre_engineer"]
+
+  cloud_engineer:
+    role_name: "Cloud Engineer"
+    responsibilities:
+      - "Design and implement cloud architecture"
+      - "Manage cloud services and resources"
+      - "Optimize cloud costs and performance"
+      - "Implement cloud security measures"
+      - "Handle cloud migrations"
+    deliverables:
+      - "cloud_architecture"
+      - "cloud_configurations"
+      - "cost_optimization.md"
+      - "cloud_security_setup"
+    dependencies: ["infrastructure_engineer"]
+    reports_to: ["infrastructure_engineer"]
+    collaborates_with: ["devops_engineer", "sre_engineer"]
+
+  sre_engineer:
+    role_name: "Site Reliability Engineer"
+    responsibilities:
+      - "Ensure system reliability and uptime"
+      - "Implement monitoring and alerting"
+      - "Handle incident response and resolution"
+      - "Optimize system performance"
+      - "Create reliability documentation"
+    deliverables:
+      - "monitoring_setup"
+      - "alerting_rules"
+      - "incident_runbooks.md"
+      - "reliability_reports.md"
+    dependencies: ["infrastructure_engineer"]
+    reports_to: ["infrastructure_engineer"]
+    collaborates_with: ["monitoring_engineer", "devops_engineer"]
+
+  monitoring_engineer:
+    role_name: "Monitoring Engineer"
+    responsibilities:
+      - "Set up comprehensive monitoring systems"
+      - "Create dashboards and visualizations"
+      - "Define monitoring metrics and KPIs"
+      - "Implement log aggregation and analysis"
+      - "Provide monitoring insights"
+    deliverables:
+      - "monitoring_dashboards"
+      - "logging_setup"
+      - "metrics_definitions.md"
+      - "monitoring_reports.md"
+    dependencies: ["sre_engineer"]
+    reports_to: ["sre_engineer"]
+    collaborates_with: ["performance_tester", "infrastructure_engineer"]
+
+  # Review and Approval Phase
+  technical_reviewer:
+    role_name: "Technical Reviewer"
+    responsibilities:
+      - "Review code quality and standards"
+      - "Ensure best practices compliance"
+      - "Provide technical feedback"
+      - "Approve technical deliverables"
+      - "Mentor junior developers"
+    deliverables:
+      - "code_review_reports.md"
+      - "technical_feedback.md"
+      - "best_practices_guide.md"
+      - "mentoring_notes.md"
+    dependencies: ["frontend_developer", "backend_developer"]
+    reports_to: ["project_manager"]
+    collaborates_with: ["senior_developer", "system_architect"]
+
+  senior_developer:
+    role_name: "Senior Developer"
+    responsibilities:
+      - "Provide technical leadership"
+      - "Mentor development team"
+      - "Make architectural decisions"
+      - "Review complex implementations"
+      - "Ensure code quality standards"
+    deliverables:
+      - "technical_leadership.md"
+      - "mentoring_reports.md"
+      - "architectural_decisions.md"
+      - "code_quality_reports.md"
+    dependencies: []
+    reports_to: ["project_manager"]
+    collaborates_with: ["technical_reviewer", "system_architect"]
+
+  project_owner:
+    role_name: "Project Owner"
+    responsibilities:
+      - "Final approval of deliverables"
+      - "Business decision making"
+      - "Resource approval and allocation"
+      - "Strategic direction setting"
+      - "Stakeholder communication"
+    deliverables:
+      - "approval_documents.md"
+      - "business_decisions.md"
+      - "strategic_direction.md"
+      - "stakeholder_updates.md"
+    dependencies: ["project_manager"]
+    reports_to: ["stakeholder"]
+    collaborates_with: ["product_owner", "project_manager"]
+
+  stakeholder:
+    role_name: "Stakeholder"
+    responsibilities:
+      - "Provide business requirements"
+      - "Make strategic decisions"
+      - "Approve budget and resources"
+      - "Review project progress"
+      - "Final business acceptance"
+    deliverables:
+      - "business_requirements.md"
+      - "strategic_decisions.md"
+      - "budget_approvals.md"
+      - "acceptance_documents.md"
+    dependencies: []
+    reports_to: []
+    collaborates_with: ["project_owner", "product_owner"]
+
+  # User Perspective
+  end_user:
+    role_name: "End User"
+    responsibilities:
+      - "Use the final product"
+      - "Provide user feedback"
+      - "Report issues and bugs"
+      - "Suggest improvements"
+      - "Validate user experience"
+    deliverables:
+      - "user_feedback.md"
+      - "bug_reports.md"
+      - "improvement_suggestions.md"
+      - "user_experience_validation.md"
+    dependencies: ["qa_tester"]
+    reports_to: ["product_owner"]
+    collaborates_with: ["user_support", "ux_researcher"]
+
+  beta_tester:
+    role_name: "Beta Tester"
+    responsibilities:
+      - "Test pre-release versions"
+      - "Provide early feedback"
+      - "Report critical issues"
+      - "Validate new features"
+      - "Test edge cases"
+    deliverables:
+      - "beta_test_reports.md"
+      - "early_feedback.md"
+      - "critical_issues.md"
+      - "feature_validation.md"
+    dependencies: ["qa_tester"]
+    reports_to: ["qa_tester"]
+    collaborates_with: ["end_user", "product_owner"]
+
+  user_support:
+    role_name: "User Support"
+    responsibilities:
+      - "Provide customer support"
+      - "Handle user inquiries"
+      - "Document common issues"
+      - "Escalate technical problems"
+      - "Maintain knowledge base"
+    deliverables:
+      - "support_tickets.md"
+      - "user_inquiries.md"
+      - "knowledge_base.md"
+      - "escalation_reports.md"
+    dependencies: ["end_user"]
+    reports_to: ["product_owner"]
+    collaborates_with: ["qa_tester", "technical_reviewer"]

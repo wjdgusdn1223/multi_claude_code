@@ -1,0 +1,252 @@
+# Automation Rules for Multi-Claude Code System
+# This file defines the rules and behaviors for automated role management
+
+system_config:
+  master_role: "project_manager"
+  status_update_interval: "5m"  # How often to update status
+  dependency_check_interval: "1m"  # How often to check dependencies
+  auto_assignment: true  # Automatically assign tasks when dependencies are met
+  notification_system: true  # Enable notifications between roles
+
+initialization_rules:
+  on_role_start:
+    - "copy_status_template_to_role_directory"
+    - "initialize_role_specific_fields"
+    - "check_dependencies"
+    - "notify_related_roles"
+    - "update_project_status"
+  
+  status_file_location: "roles/{role_id}/status.yaml"
+  required_fields:
+    - "role_info.role_name"
+    - "role_info.role_id"
+    - "current_status.phase"
+    - "dependencies.ready_to_start"
+
+update_triggers:
+  status_updates:
+    - "task_completion"
+    - "deliverable_completion"
+    - "phase_change"
+    - "blocker_encountered"
+    - "dependency_resolved"
+    - "manual_update_request"
+  
+  auto_actions:
+    - trigger: "task_completion"
+      action: "update_progress_percentage"
+    - trigger: "deliverable_completion"
+      action: "notify_dependent_roles"
+    - trigger: "phase_change"
+      action: "update_project_timeline"
+    - trigger: "blocker_encountered"
+      action: "escalate_to_manager"
+
+dependency_management:
+  check_rules:
+    - "before_starting_task"
+    - "before_changing_phase"
+    - "before_delivering_output"
+  
+  resolution_actions:
+    - condition: "dependency_met"
+      action: "auto_start_next_task"
+    - condition: "dependency_blocked"
+      action: "notify_blocking_role"
+    - condition: "circular_dependency"
+      action: "escalate_to_project_manager"
+
+phase_transitions:
+  allowed_transitions:
+    planning:
+      - "in_progress"
+      - "paused"
+    in_progress:
+      - "review"
+      - "completed"
+      - "blocked"
+      - "paused"
+    review:
+      - "in_progress"
+      - "completed"
+      - "blocked"
+    completed:
+      - "in_progress"  # Only for rework
+    blocked:
+      - "in_progress"
+      - "paused"
+    paused:
+      - "in_progress"
+      - "planning"
+  
+  transition_rules:
+    - from: "planning"
+      to: "in_progress"
+      conditions:
+        - "all_dependencies_met"
+        - "required_inputs_received"
+        - "resources_available"
+    - from: "in_progress"
+      to: "review"
+      conditions:
+        - "all_tasks_completed"
+        - "deliverables_produced"
+        - "quality_checks_passed"
+    - from: "review"
+      to: "completed"
+      conditions:
+        - "all_reviews_approved"
+        - "quality_gates_passed"
+        - "deliverables_accepted"
+
+communication_rules:
+  notification_events:
+    - "status_change"
+    - "deliverable_ready"
+    - "dependency_resolved"
+    - "blocker_encountered"
+    - "review_requested"
+    - "approval_needed"
+  
+  notification_targets:
+    status_change:
+      - "direct_dependencies"
+      - "project_manager"
+    deliverable_ready:
+      - "dependent_roles"
+      - "reviewers"
+    blocker_encountered:
+      - "blocking_roles"
+      - "project_manager"
+      - "senior_developer"
+  
+  escalation_rules:
+    - condition: "blocked_for_24h"
+      action: "escalate_to_project_manager"
+    - condition: "dependency_unresolved_for_48h"
+      action: "escalate_to_project_owner"
+    - condition: "critical_blocker"
+      action: "immediate_escalation"
+
+quality_assurance:
+  mandatory_reviews:
+    - role: "technical_reviewer"
+      for: ["code_deliverables", "technical_specifications"]
+    - role: "senior_developer"
+      for: ["architectural_decisions", "complex_implementations"]
+    - role: "qa_tester"
+      for: ["functional_deliverables", "system_components"]
+  
+  approval_gates:
+    - phase: "planning_to_development"
+      approvers: ["system_architect", "product_owner"]
+    - phase: "development_to_testing"
+      approvers: ["technical_reviewer", "qa_tester"]
+    - phase: "testing_to_deployment"
+      approvers: ["project_manager", "devops_engineer"]
+    - phase: "deployment_to_production"
+      approvers: ["project_owner", "stakeholder"]
+
+monitoring_rules:
+  health_checks:
+    - check: "role_responsiveness"
+      interval: "5m"
+      threshold: "30s"
+    - check: "dependency_chain_integrity"
+      interval: "10m"
+    - check: "deliverable_quality"
+      interval: "1h"
+  
+  alert_conditions:
+    - condition: "role_unresponsive_for_15m"
+      action: "send_health_check_alert"
+    - condition: "project_behind_schedule"
+      action: "notify_project_manager"
+    - condition: "quality_gate_failed"
+      action: "halt_pipeline"
+
+automation_behaviors:
+  auto_task_assignment:
+    enabled: true
+    rules:
+      - "assign_when_dependencies_met"
+      - "prioritize_critical_path"
+      - "balance_workload"
+  
+  auto_status_updates:
+    enabled: true
+    frequency: "on_event"
+    batch_updates: false
+  
+  auto_deliverable_routing:
+    enabled: true
+    rules:
+      - "route_to_reviewers"
+      - "notify_dependent_roles"
+      - "update_project_status"
+
+error_handling:
+  common_errors:
+    - error: "dependency_not_found"
+      action: "create_dependency_request"
+    - error: "deliverable_format_invalid"
+      action: "notify_producer_and_reviewer"
+    - error: "role_unavailable"
+      action: "reassign_or_escalate"
+    - error: "circular_dependency_detected"
+      action: "escalate_to_project_manager"
+  
+  recovery_procedures:
+    - scenario: "role_failure"
+      steps:
+        - "save_current_state"
+        - "reassign_to_backup_role"
+        - "notify_affected_dependencies"
+    - scenario: "deliverable_rejected"
+      steps:
+        - "return_to_producer"
+        - "update_status_to_rework"
+        - "schedule_review_cycle"
+
+project_lifecycle:
+  phases:
+    - "initiation"
+    - "planning"
+    - "execution"
+    - "monitoring"
+    - "closure"
+  
+  phase_completion_criteria:
+    initiation:
+      - "project_charter_approved"
+      - "stakeholders_identified"
+      - "initial_requirements_gathered"
+    planning:
+      - "detailed_requirements_documented"
+      - "architecture_designed"
+      - "team_assignments_completed"
+    execution:
+      - "all_deliverables_produced"
+      - "quality_gates_passed"
+      - "integration_tests_passed"
+    monitoring:
+      - "performance_metrics_validated"
+      - "user_acceptance_completed"
+      - "production_readiness_verified"
+    closure:
+      - "final_deliverables_approved"
+      - "project_documentation_completed"
+      - "lessons_learned_documented"
+
+integration_points:
+  external_systems:
+    - "version_control_system"
+    - "ci_cd_pipeline"
+    - "project_management_tools"
+    - "communication_platforms"
+  
+  data_synchronization:
+    - "status_updates_to_central_dashboard"
+    - "deliverable_tracking"
+    - "dependency_graph_updates"
+    - "progress_reporting"

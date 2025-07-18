@@ -1,0 +1,41 @@
+# Multi-Agent Claude Code System Requirements
+
+# 웹 프레임워크
+Flask==2.3.3
+Flask-SocketIO==5.3.6
+
+# 데이터베이스
+sqlite3  # Python 내장 모듈
+
+# 시스템 관리
+psutil==5.9.5
+
+# 비동기 처리
+python-socketio==5.8.0
+
+# 유틸리티
+PyYAML==6.0.1
+pathlib  # Python 내장 모듈
+dataclasses  # Python 내장 모듈
+enum34; python_version < '3.4'
+uuid  # Python 내장 모듈
+threading  # Python 내장 모듈
+subprocess  # Python 내장 모듈
+queue  # Python 내장 모듈
+logging  # Python 내장 모듈
+time  # Python 내장 모듈
+datetime  # Python 내장 모듈
+json  # Python 내장 모듈
+os  # Python 내장 모듈
+re  # Python 내장 모듈
+hashlib  # Python 내장 모듈
+mimetypes  # Python 내장 모듈
+fnmatch  # Python 내장 모듈
+signal  # Python 내장 모듈
+pickle  # Python 내장 모듈
+collections  # Python 내장 모듈
+
+# 선택적 의존성
+# 더 나은 성능을 위해 설치 권장
+eventlet==0.33.3  # SocketIO 성능 향상
+gevent==23.7.0   # 비동기 처리 성능 향상
